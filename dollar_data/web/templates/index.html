@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Dollar Data{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<h1>Graph for Dollar Data</h1>
+<script>
+    let data = {{ data|tojson }};
+    console.log(data);
+</script>
+{% endblock %}
