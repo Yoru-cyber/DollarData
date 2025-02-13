@@ -6,8 +6,36 @@
 
 {% block content %}
 <h1>Graph for Dollar Data</h1>
+<canvas id="myChart">
+
+</canvas>
 <script>
-    let data = {{ data|tojson }};
-    console.log(data);
+  let data = {{ data|tojson }};
+  console.log(data);
+  const ctx = document.getElementById('myChart');
+  let labels = [];
+  let values = [];
+  data.forEach(e => {
+    labels.push(e.date);
+    values.push(e.buybid)
+  });
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'USD to BS. S',
+        data: values,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
 </script>
 {% endblock %}

@@ -1,17 +1,22 @@
 from flask import Flask, render_template
-import sqlite3
+from sqlalchemy import func
+from dollar_data.database import db_session, init_db
+from dollar_data.models import Dollar
 import os
 
 cwd = os.getcwd()
-# con = sqlite3.connect(cwd + "/database.db")
-# cur = con.cursor()
 app = Flask(__name__)
-
+init_db()
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()
 
 @app.route("/")
 def hello_world():
-    with sqlite3.connect(cwd + "/database.db") as con:
-        cur = con.cursor()
-        res = cur.execute("SELECT * FROM HistoricalDollar LIMIT 50 OFFSET 0")
-        data = res.fetchall()
-        return render_template(template_name_or_list="index.html", data=data)
+    data = Dollar.query. \
+        filter(func.strftime('%d', Dollar.date) == '10'). \
+        all()
+    serialized = list()
+    for _ in data:
+        serialized.append(_.as_dict())
+    return render_template(template_name_or_list="index.html", data=serialized)
