@@ -1,13 +1,18 @@
+import os
+from pathlib import Path
 import pandas as pd
 from pandas import DataFrame
+from sqlalchemy import create_engine
 import xlrd
 import matplotlib.pyplot as plt
 import pathlib
 import requests
-import sqlite3
 from bs4 import BeautifulSoup
 
 pd.options.mode.copy_on_write = True
+
+cwd = os.getcwd()
+engine = create_engine(f"sqlite:////{cwd}/database.db", echo=True)
 
 
 def read_xls(path: pathlib.Path | str) -> list:
@@ -89,11 +94,7 @@ def plot_pdf(df: DataFrame):
     plt.savefig("dollar_to_bs_rate.pdf")
 
 
-def main():
-    data = read_xls("../2_1_2a24_smc.xls")
-    data.extend(read_xls("../2_1_2b24_smc.xls"))
-    data.extend(read_xls("../2_1_2c24_smc.xls"))
-    data.extend(read_xls("../2_1_2d24_smc.xls"))
+def scrape_excel() -> str:
     html = requests.get(
         "https://www.bcv.org.ve/estadisticas/tipo-cambio-de-referencia-smc",
         verify=False,
@@ -104,23 +105,24 @@ def main():
     )
     url = a[0].get("href")
     file_stream = requests.get(url, verify=False)
-    file_name = url.split("/")[-1]
-    with open(f"../{file_name}.xls", "wb") as f:
+    file_name = "last_updated_excel.xls"
+    path = f"{cwd}/dollar_data/excel_files/"
+    Path(path).mkdir(exist_ok=True)
+    with open(f"{path}{file_name}", "wb") as f:
         f.write(file_stream.content)
-    data.extend(read_xls(f"../{file_name}.xls"))
-    df = pd.DataFrame(data)
-    clean_dataframe(df)
-    df = dollar_to_bs_rate(df)
-    df = df.sort_values("Date")
+    return f"{path}{file_name}"
+
+
+def insert_into_database(df: DataFrame):
     df = df.reset_index(drop=True)
     df = df.rename(
         columns={"Date": "DATE", "Currency": "CURRENCY", "Buy(BS. S BID)": "BUYBID"}
     )
-    # cnx = sqlite3.connect('../database.db')
-    # df.to_sql(name="HistoricalDollar", con=cnx, if_exists="append", index=False)
-    # print(df)
-    ##dollar_to_bs_rate_plot(df)
-    ##plot_pdf(df)
+    df.to_sql(con=engine, name="HistoricalDollar", if_exists="append", index=False)
+
+
+def main():
+    pass
 
 
 if __name__ == "__main__":
