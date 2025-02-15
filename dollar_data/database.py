@@ -12,9 +12,7 @@ Base.query = db_session.query_property()
 
 
 def init_db():
-    # import all modules here that might define models so that
-    # they will be registered properly on the metadata.  Otherwise
-    # you will have to import them first before calling init_db()
-    import dollar_data.models as models
+    # even though models is not directly used, it has to imported for metadata as the Flask-SQAlchemy says so
+    import dollar_data.models as models # noqa
 
     Base.metadata.create_all(bind=engine)

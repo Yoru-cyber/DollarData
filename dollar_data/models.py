@@ -1,5 +1,5 @@
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import create_engine, Column, Integer, String, REAL
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String, REAL
 
 from dollar_data.database import Base
 
