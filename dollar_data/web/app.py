@@ -1,19 +1,15 @@
 import os
-import pandas as pd
 from flask_apscheduler import APScheduler
 from flask import Flask, render_template
 from sqlalchemy import func
 from dollar_data.database import db_session, init_db
 from dollar_data.jobs import update_database, check_missing_entries
 from dollar_data.models import Dollar
-from dollar_data.utils import scrape_excel, read_xls, clean_dataframe, dollar_to_bs_rate
 
 
 class Config:
     SCHEDULER_API_ENABLED = True
 
-
-# Add job on start to check for missing dates in database
 
 cwd = os.getcwd()
 app = Flask(__name__)
@@ -38,13 +34,13 @@ def hello_world():
 
 if __name__ == "__main__":
     scheduler.add_job(
-        func=update_database, trigger="interval", id="update_database", hours=1
+        func=update_database, trigger="interval", id="update_database", hours=24
     )
     scheduler.add_job(
         func=check_missing_entries,
         trigger="interval",
         id="check_missing_entries",
-        seconds=5,
+        hours=24,
     )
     scheduler.init_app(app)
     scheduler.start()
