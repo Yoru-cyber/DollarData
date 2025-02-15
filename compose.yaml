@@ -1,0 +1,6 @@
+services:
+  web:  # Your Flask application service
+    build: .  # Build the image from the Dockerfile in the current directory
+    ports:
+      - "8000:8000"  # Map port 5000 on the host to port 5000 in the container
+    restart: always # Restart the container if it crashes
