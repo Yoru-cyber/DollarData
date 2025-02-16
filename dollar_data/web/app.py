@@ -2,7 +2,10 @@ import os
 from flask import Flask, render_template
 from sqlalchemy import func
 from dollar_data.database import db_session, init_db
+from dollar_data.logging import configure_logging
+from dollar_data.metrics import configure_metrics
 from dollar_data.models import Dollar
+from dollar_data.tracing import configure_tracing
 
 
 class Config:
@@ -16,6 +19,9 @@ init_db()
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config())
+    configure_metrics()
+    configure_logging()
+    configure_tracing(app)
     return app
 
 

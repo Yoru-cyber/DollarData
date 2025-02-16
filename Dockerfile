@@ -4,6 +4,9 @@ FROM python:3.11.11-slim-bookworm
 # Set the working directory inside the container
 WORKDIR /app
 
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
 # Copy the Poetry configuration files
 COPY . /app
 
@@ -19,4 +22,4 @@ RUN poetry config virtualenvs.create false
 RUN poetry install --no-interaction --without dev
 
 
-CMD [ "gunicorn" ]
+CMD ["opentelemetry-instrument", "--traces_exporter", "otlp", "--metrics_exporter", "otlp", "--logs_exporter", "otlp", "gunicorn" ]

@@ -21,6 +21,9 @@ dependencies = [
     "matplotlib (>=3.10.0,<4.0.0)",
     "flask-apscheduler (>=1.13.1,<2.0.0)",
     "gunicorn (>=23.0.0,<24.0.0)",
+    "opentelemetry-instrumentation-flask (>=0.51b0,<0.52)",
+    "opentelemetry-distro (>=0.51b0,<0.52)",
+    "opentelemetry-exporter-otlp (>=1.30.0,<2.0.0)",
 
 ]
 [tool.poetry.dependencies]

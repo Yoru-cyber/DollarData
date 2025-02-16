@@ -1,6 +1,56 @@
 services:
   web:  # Your Flask application service
     build: .  # Build the image from the Dockerfile in the current directory
+    environment:
+      - OTEL_SERVICE_NAME=flask-app
+      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production
+      - OTEL_PYTHON_LOG_CORRELATION=true
+    depends_on:
+      - otel-collector
     ports:
       - "8000:8000"  # Map port 5000 on the host to port 5000 in the container
     restart: always # Restart the container if it crashes
+    networks:
+      - observability
+  otel-collector:
+    hostname: otel-collector
+    image: otel/opentelemetry-collector:latest
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol/config.yaml
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "8889:8889"   # Metrics exporter
+      - "9411:9411"   # Zipkin
+    networks:
+      - observability
+
+  jaeger:
+    hostname: jaeger
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686" # Jaeger UI
+    networks:
+      - observability
+  prometheus:
+    hostname: prometheus
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus:/etc/prometheus
+    command: 
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+    networks:
+      - observability
+  grafana:
+    hostname: grafana
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    networks:
+      - observability
+networks:
+  observability:
+    driver: bridge
