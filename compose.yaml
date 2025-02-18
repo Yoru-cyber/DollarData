@@ -5,6 +5,8 @@ services:
       - OTEL_SERVICE_NAME=flask-app
       - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production
       - OTEL_PYTHON_LOG_CORRELATION=true
+      - VIRTUAL_HOST=dollardata.local
+      - VIRTUAL_PORT=8000
     depends_on:
       - otel-collector
     ports:
@@ -51,6 +53,17 @@ services:
       - "3000:3000"
     networks:
       - observability
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    depends_on: 
+      - web
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - observability
+
 networks:
   observability:
     driver: bridge

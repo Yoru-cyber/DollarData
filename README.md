@@ -33,7 +33,7 @@ This Python project automates the process of collecting, storing, and visualizin
           * Checking for data completeness by verifying the number of records from the latest entry to the current date, ensuring data integrity.
   * **Production-Ready Deployment:**
       * Configuration for deployment with `Gunicorn` as a WSGI server for robust web application serving.
-      * Designed to be deployed behind a web server like `Nginx` (preferred) or `Apache` for enhanced performance and security.
+      * Designed to be deployed behind a web server like `Nginx`.
       * Containerized with `Docker` and orchestrated with `Docker Compose` for easy setup and deployment.
   * **Documentation:**
       * Automatic documentation generation using `Sphinx` based on the project's codebase.
@@ -60,9 +60,9 @@ This Python project automates the process of collecting, storing, and visualizin
     * `Jaeger`
     * `Zipkin`
 * **Deployment:**
-    * **Containerization:** Docker, Docker Compose
+    * **Containerization:** `Docker`, `Docker Compose`
     * **Web Server (WSGI):** `gunicorn`
-    * **Web Server (Production):** `Nginx` (Recommended) or `Apache`
+    * **Web Server (Production):** `Nginx` 
 
 ## Installation
 
@@ -107,7 +107,13 @@ To set up the project locally, follow these steps:
     docker-compose up --build
     ```
 
-    The web application will be accessible at `http://localhost:8000/`.
+    **IMPORTANT** ⚠️ IF YOU DON'T HAVE A HOST NAME SET TO RESOLVE THE NGINX ADDRESS IT WILL NOT WORK !!!
+
+    *Go to [Proxy Details](#proxy-details) for more info.*
+
+    The web application will be accessible at `http://dollardata.local/`.
+    
+
 
 2.  **Access the Web Interface:**
 
@@ -157,6 +163,67 @@ The project documentation is built using `Sphinx`. To build the documentation lo
     sphinx-autobuild docs/source docs/build
     ```
 
+## Proxy details
+
+You need to set dollardata.local to resolve the nginx-proxy container's address.
+
+Run:
+
+```bash
+docker ps
+```
+
+Find the name of the container which has the nginx-proxy image
+
+```bash
+IMAGE            NAMES
+nginx-proxy   nameofcontainer
+```
+
+```bash
+docker inspect nameofcontainer
+```
+
+And then look for `IPAddress`:
+
+```json
+{
+    "Gateway": "192.168.176.1",
+    "IPAddress": "192.168.176.2", //This one
+}
+```
+
+Now you need to set dollardata.local to resolve to 192.168.176.2.
+
+**On Windows**
+
+There's probably a GUI to change the virtual host configuration but i personally don't know how. 
+
+Google it yourself.
+
+<p align="center">
+<img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXl6Y3ZlcXl1ejJteTV6bDc4dGVzcDF0czc0b2R0ZmtlY2h2Nm50diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ZNnQvIYzIBmZAbrBR7/giphy.gif">
+<p/>
+
+**On Linux**
+
+1. **Edit the `/etc/hosts` file:**
+   - Open a terminal.
+   - Use a text editor (like `nano` or `vim`) to open the `/etc/hosts` file:
+     ```bash
+     sudo nano /etc/hosts
+     ```
+
+2. **Add Hostname Mapping:**
+   - Find the line that starts with `127.0.0.1` (localhost).
+   - Add your computer's IP address and hostname to the end of that line, separated by spaces:
+     ```
+     127.0.0.1 localhost
+     containeraddress dollardata.local
+     ```
+   - Save the file and exit the editor.
+
+That's all.
 
 ## License
 
@@ -165,7 +232,8 @@ This project is licensed under the IDC(I don't care) License. See the `LICENSE` 
 
 ## Note
 
-This is currently just a toy project and aims not to be for a professional project.
+1. This is currently just a toy project and aims not to be for a professional project.
+2. The Nginx container is configured to proxy pass with a Virtual Host parameter, which means that you have to set the an adress to resolve the host name 
 
 That's all.
 
